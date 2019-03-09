@@ -1,0 +1,207 @@
+
+:host {
+	bottom: 0px ;
+	display: flex ;
+	font-family: "Open Sans", sans-serif ;
+	font-smoothing: antialiased ;
+		-webkit-font-smoothing: antialiased ;
+	font-weight: 300 ;
+	left: 0px ;
+	position: fixed ;
+	right: 0px ;
+	text-rendering: optimizelegibility ;
+	top: 0px ;
+}
+
+.header {
+	flex: 0 0 auto ;
+	border-right: 2px solid #ffffff ;
+}
+
+.body {
+	background-color: #f9f9fb ;
+	flex: 1 1 auto ;
+	overflow: auto ;
+	position: relative ;
+}
+
+.app-header {
+	background-color: #1f2531 ;
+	display: flex ;
+	flex-direction: column ;
+	padding: 10px 0px 20px 0px ;
+	width: 70px ;
+
+	&__logo {
+		color: #ffffff ;
+		display: flex ;
+		font-family: monospace ;
+		font-size: 18px ;
+		font-weight: bold ;
+		height: 60px ;
+		line-height: 60px ;
+		text-align: center ;
+		text-decoration: none ;
+	}
+
+	&__logo svg {
+		height: 45px ;
+		margin: auto auto auto auto ;
+		width: 45px ;
+	}
+
+	&__nav {
+		background-color: #1c222d ;
+		margin-top: 40px ;
+	}
+
+	&__nav-item {
+		border-right: 2px solid #1f2531 ;
+		display: block ;
+		font-family: monospace ;
+		font-size: 18px ;
+		font-weight: bold ;
+		height: 60px ;
+		line-height: 60px ;
+		text-align: center ;
+		text-decoration: none ;
+
+		&--flow {
+			display: flex ;
+
+			&::before {
+				background-color: #00a553 ;
+				border-radius: 16px 16px 16px 16px ;
+				content: "" ;
+				height: 16px ;
+				margin: auto auto auto auto ;
+				width: 16px ;
+			}
+
+			&.app-header__nav-item--on {
+				border-right-color: #00a553 ;
+			}
+		}
+
+		&--unreachable {
+			display: flex ;	
+
+			&::before {
+				background-color: #f4c712 ;
+				border-radius: 16px 16px 16px 16px ;
+				content: "" ;
+				height: 16px ;
+				margin: auto auto auto auto ;
+				width: 16px ;
+			}
+
+			&.app-header__nav-item--on {
+				border-right-color: #f4c712 ;
+			}	
+		}
+	}
+
+	&__zoom {
+		margin: auto 15px 0px 15px ;
+		margin-top: auto ;
+	}
+
+	&__zoom-item {
+		background-color: #1f2531 ;
+		border: 2px solid #2c3546 ;
+		border-radius: 40px 40px 40px 40px ;
+		color: #c9d1dc ;
+		cursor: pointer ;
+		display: block ;
+		height: 40px ;
+		font-size: 21px ;
+		line-height: 37px ;
+		position: relative ;
+		text-align: center ;
+		text-decoration: none ;
+		user-select: none ;
+			-moz-user-select: none ;
+			-webkit-user-select: none ;
+		width: 40px ;
+	}
+
+	&__zoom-item--in {
+		margin-bottom: 10px ;
+	}
+	&__zoom-item--in::before {
+		background-color: #c9d1dc ;
+		border-radius: 2px 2px 2px 2px ;
+		content: "" ;
+		height: 2px ;
+		left: 50% ;
+		position: absolute ;
+		top: 50% ;
+		transform: translateX( -50% ) translateY( -50% ) ;
+		width: 11px ;
+	}
+	&__zoom-item--in::after {
+		background-color: #c9d1dc ;
+		border-radius: 2px 2px 2px 2px ;
+		content: "" ;
+		height: 11px ;
+		left: 50% ;
+		position: absolute ;
+		top: 50% ;
+		transform: translateX( -50% ) translateY( -50% ) ;
+		width: 2px ;
+	}
+
+	&__zoom-item--out::before {
+		background-color: #c9d1dc ;
+		border-radius: 2px 2px 2px 2px ;
+		content: "" ;
+		height: 2px ;
+		left: 50% ;
+		position: absolute ;
+		top: 50% ;
+		transform: translateX( -50% ) translateY( -50% ) ;
+		width: 11px ;
+	}
+} // END: App-Header.
+
+
+// On a fast network connection, the lazy-loaded modules will load almost instantly. In
+// such a case, we don't want to bother showing the asynchronous loading indicator as it
+// will simply flash the UI and create a distracting user experience. As such, we want to
+// put a small delay on the "observability" of the loading indicator. This way, on a fast
+// connection, it will be removed before the delay is consumed; and, on a slower network
+// connection, it will be shown to the user soon after the asynchronous load starts.
+// --
+// CAUTION: keyframes are not "protected" by Angular's simulated encapsulation. As such,
+// this animation name needs to be universally unique to the application.
+@keyframes router-load-indicator-animation {
+	from {
+		opacity: 0.0 ;
+	}
+
+	to {
+		opacity: 1.0 ;
+	}
+}
+
+.router-load-indicator {
+	// Delay the animation for a fast network connection (so users don't see the loader).
+	animation-delay: 100ms ;
+	animation-duration: 200ms ;
+	animation-fill-mode: both ;
+	animation-name: router-load-indicator-animation ;
+	// --
+	background-color: #ffdc73 ;
+	border-radius: 5px 5px 5px 5px ;
+	box-shadow: 0px 2px 2px fade( #000000, 20% ) ;
+	color: #000000 ;
+	font-family: monospace ;
+	font-size: 16px ;
+	left: 50% ;
+	padding: 7px 15px 7px 15px ;
+	position: fixed ;
+	text-transform: lowercase ;
+	top: 10px ;
+	transform: translateX( -50% ) ;
+	z-index: 2 ;
+}
