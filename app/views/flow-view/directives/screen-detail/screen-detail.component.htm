@@ -1,0 +1,50 @@
+
+<!-- This keeps the content centered and fixed-width. -->
+<div class="content">
+
+	<div [title]="treeNode.screen.name" class="name">
+		{{ treeNode.screen.name }}
+	</div>
+
+	<div [title]="treeNode.screen.clientFilename" class="filename">
+		{{ treeNode.screen.clientFilename }}
+	</div>
+
+	<div class="actions">
+		<a (click)="startFlowFromScreen()" class="action">
+			Start Here
+		</a>
+		<span class="action-separator">
+			<br />
+		</span>
+		<a (click)="viewScreenInPreview()" class="action">
+			Preview Screen
+		</a>
+	</div>
+
+	<div class="thumbnail">
+
+		<img
+			[src]="treeNode.screen.imageUrl"
+			class="image"
+			[style.width.px]="( treeNode.screen.width * displayScale )"
+			[style.height.px]="( treeNode.screen.height * displayScale )"
+		/>
+
+		<!-- The hotspots will overlay the above image. -->
+		<div class="hotspots">
+			<a
+				*ngFor="let hotspot of treeNode.hotspots"
+				(click)="selectHotspot( hotspot )"
+				class="hotspot"
+				[style.width.px]="( hotspot.width * displayScale )"
+				[style.height.px]="( hotspot.height * displayScale )"
+				[style.left.px]="( hotspot.x * displayScale )"
+				[style.top.px]="( hotspot.y * displayScale )">
+				<br />
+			</a>
+		</div>
+
+	</div>
+
+</div>

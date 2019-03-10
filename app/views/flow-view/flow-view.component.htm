@@ -1,13 +1,57 @@
 
-Flow View
+<!-- BEGIN: Screen Explorer Subview. -->
+<div class="explorer-subview explorer">
 
+	<div
+		*ngIf="project"
+		inv-tree-dragger
+		(draggerStart)="setDragProtection( true )"
+		(draggerStop)="setDragProtection( false )"
+		inv-tree-scroller
+		class="explorer__tree">
+		<!-- We need the INNER wrapper for proper padding. -->
+		<div class="explorer__tree-inner">
 
+			<header class="subview-header">
 
+				<h2 class="subview-header__title">
+					{{ project.name }}
+				</h2>
+
+				<div class="subview-header__description">
+					Your screen flow includes --- reachableScreenCount ---- linked screen(s) from your prototype.
+				</div>
+
+			</header>
+
+			<inv-screen-tree
+				[rootTreeNode]="tree.root"
+				[selectedTreeNode]="selectedTreeNode"
+				[screenOrientation]="projectOrientation"
+				[screenSize]="screenSize"
+				(select)="handleSelect( $event )">
+			</inv-screen-tree>
+
+		</div>
+	</div>
+	<div *ngIf="selectedTreeNode" class="explorer__detail">
+
+		<inv-screen-detail
+			[treeNode]="selectedTreeNode"
+			(selectHotspot)="handleSelectHotspot( $event )"
+			(previewScreen)="viewScreenInPreview( $event )"
+			(startFromScreen)="startFlowFromScreen( $event )">
+		</inv-screen-detail>
+
+	</div>
+
+</div>
+<!-- END: Screen Explorer Subview. -->
 
 <!--
 	This will be shown when the app is dragging so as to prevent mouse events from
 	reaching lower-level DOM elements.
 -->
-<div *ngIf="false" class="drag-shield">
+<div *ngIf="isProtectingDrag" class="drag-shield">
 	<br />
 </div>

@@ -8,6 +8,9 @@ import { Routes } from "@angular/router";
 // Import the application components and services.
 import { FlowViewComponent } from "./flow-view.component";
 import { RoutableView } from "~/app/app.module";
+import { ScreenDetailComponent } from "./directives/screen-detail/screen-detail.component";
+import { ScreenTreeComponent } from "./directives/screen-tree/screen-tree.component";
+import { ScreenTreeNodeComponent } from "./directives/screen-tree/screen-tree-node.component";
 
 // ----------------------------------------------------------------------------------- //
 // ----------------------------------------------------------------------------------- //
@@ -22,7 +25,10 @@ import { RoutableView } from "~/app/app.module";
 		// RouterModule // <--- Include if you need router-outlet or routerLink.
 	],
 	declarations: [
-		FlowViewComponent
+		FlowViewComponent,
+		ScreenDetailComponent,
+		ScreenTreeComponent,
+		ScreenTreeNodeComponent
 	]
 })
 export class FlowViewModule {

@@ -130,4 +130,18 @@ export class AppViewComponent {
 
 	}
 
+
+	public zoomIn() : void {
+
+		this.screenFlowRuntime.zoomIn();
+
+	}
+
+
+	public zoomOut() : void {
+
+		this.screenFlowRuntime.zoomOut();
+
+	}
+
 }

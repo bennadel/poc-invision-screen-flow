@@ -27,6 +27,9 @@ export interface FlowTreeHotspot {
 
 export interface FlowTreeNode {
 	hardLinkIDs: number[];
+	hotspots?: FlowTreeHotspot[];
+	id: number;
+	links: FlowTreeNode[];
 	softLinkIDs: number[];
 	screen: FlowTreeScreen;
 }
@@ -34,10 +37,8 @@ export interface FlowTreeNode {
 export interface FlowTreeScreen {
 	clientFilename: string;
 	height: number;
-	hotspots?: FlowTreeHotspot[];
 	id: number;
 	imageUrl: string;
-	links: FlowTreeNode[];
 	name: string;
 	thumbnailUrl: string;
 	width: number;
@@ -84,7 +85,95 @@ export class ScreenFlowRuntime {
 	}
 
 	// ---
-	// PUBLIC METHODS.
+	// COMMAND METHODS.
+	// ---
+
+	public async load( version: 1 ) : Promise<void> {
+
+		this.store.setState({
+			isLoading: true,
+			project: null,
+			projectOrientation: null,
+			selectedTreeNode: null,
+			tree: null
+		});
+
+		// NOTE: Since this is just a proof-of-concept, having the HTTP call right here
+		// in the runtime is OK. However, in production, this logic should be moved into
+		// a more formal API Client.
+		var promise = this.httpClient
+			.get( `./static/${ version }/data.json` )
+			.toPromise()
+			.then(
+				( response: any ) => {
+
+					this.store.setState({
+						isLoading: false,
+						project: response.project,
+						projectOrientation: response.projectOrientation,
+						tree: response.tree
+					});
+
+				}
+			)
+		;
+
+		return( promise );
+
+	}
+
+
+	public selectTreeNode( treeNode: FlowTreeNode ) : void {
+
+		this.store.setState({
+			selectedTreeNode: treeNode
+		});
+
+	}
+
+
+	public unselectTreeNode( treeNode: FlowTreeNode ) : void {
+
+		this.store.setState({
+			selectedTreeNode: null
+		});
+
+	}
+
+
+	// I increase the zoom of the flow-tree.
+	public zoomIn() : void {
+
+		var screenSize = this.store.getSnapshot().screenSize;
+
+		if ( screenSize < 5 ) {
+
+			this.store.setState({
+				screenSize: ( screenSize + 1 )
+			});
+
+		}
+
+	}
+
+
+	// I decrease the zoom of the flow-tree.
+	public zoomOut() : void {
+
+		var screenSize = this.store.getSnapshot().screenSize;
+
+		if ( screenSize > 1 ) {
+
+			this.store.setState({
+				screenSize: ( screenSize - 1 )
+			});
+
+		}
+
+	}
+
+	// ---
+	// QUERY METHODS.
 	// ---
 
 	public getIsLoading() : Observable<boolean> {
@@ -152,70 +241,6 @@ export class ScreenFlowRuntime {
 		);
 
 		return( reducedStream );
-
-	}
-
-
-	public async load( version: 1 ) : Promise<void> {
-
-		this.store.setState({
-			isLoading: true,
-			project: null,
-			projectOrientation: null,
-			selectedTreeNode: null,
-			tree: null
-		});
-
-		var promise = this.httpClient
-			.get( `./static/${ version }/data.json` )
-			.toPromise()
-			.then(
-				( response: any ) => {
-
-					this.store.setState({
-						isLoading: false,
-						project: response.project,
-						projectOrientation: response.projectOrientation,
-						tree: response.tree
-					});
-
-				}
-			)
-		;
-
-		return( promise );
-
-	}
-
-
-	// I increase the zoom of the flow-tree.
-	public zoomIn() : void {
-
-		var screenSize = this.store.getSnapshot().screenSize;
-
-		if ( screenSize < 5 ) {
-
-			this.store.setState({
-				screenSize: ( screenSize + 1 )
-			});
-
-		}
-
-	}
-
-
-	// I decrease the zoom of the flow-tree.
-	public zoomOut() : void {
-
-		var screenSize = this.store.getSnapshot().screenSize;
-
-		if ( screenSize > 1 ) {
-
-			this.store.setState({
-				screenSize: ( screenSize - 1 )
-			});
-
-		}
 
 	}
 

@@ -1,0 +1,61 @@
+
+<div class="node">
+
+	<div
+		(click)="handleSelect( treeNode )"
+		(mouseenter)="handleShowHints( treeNode )"
+		(mouseleave)="handleHideHints( treeNode )"
+		title="{{ treeNode.screen.name }} ( {{ treeNode.screen.clientFilename }} )"
+		class="screen tree-screen"
+		[class.tree-screen--selected]="isScreenSelected"
+		[class.tree-screen--hinted]="isScreenHinted"
+		[class.tree-screen--landscape]="( screenOrientation === 'landscape' )"
+		[class.tree-screen--portrait]="( screenOrientation === 'portrait' )"
+		[class.tree-screen--size-1]="( screenSize === 1 )"
+		[class.tree-screen--size-2]="( screenSize === 2 )"
+		[class.tree-screen--size-3]="( screenSize === 3 )"
+		[class.tree-screen--size-4]="( screenSize === 4 )"
+		[class.tree-screen--size-5]="( screenSize === 5 )">
+
+		<div class="tree-screen__thumbnail">
+			<img [src]="treeNode.screen.thumbnailUrl" class="tree-screen__image" />
+		</div>
+
+		<div class="tree-screen__name">
+			{{ treeNode.screen.name }}
+		</div>
+
+	</div>
+
+</div>
+
+<div *ngIf="treeNode.links.length" class="children">
+
+	<div class="children-notch">
+		<br />
+	</div>
+
+	<div
+		*ngFor="let linkedTreeNode of treeNode.links ; let first = first ; let last = last ;"
+		class="child"
+		[class.child--first]="first"
+		[class.child--last]="last">
+
+		<div class="child-notch">
+			<br />
+		</div>
+	
+		<inv-screen-tree-node
+			[treeNode]="linkedTreeNode"
+			[selectedTreeNode]="selectedTreeNode"
+			[hintedTreeNodeIds]="hintedTreeNodeIds"
+			[screenOrientation]="screenOrientation"
+			[screenSize]="screenSize"
+			(select)="handleSelect( $event )"
+			(showHints)="handleShowHints( $event )"
+			(hideHints)="handleHideHints( $event )">
+		</inv-screen-tree-node>
+
+	</div>
+
+</div>

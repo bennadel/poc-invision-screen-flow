@@ -3,6 +3,35 @@
 	display: block ;
 }
 
+.explorer-subview {}
+
+.explorer {
+	bottom: 0px ;
+	display: flex ;
+	left: 0px ;
+	position: absolute ;
+	right: 0px ;
+	top: 0px ;
+
+	&__tree {
+		cursor: grab ;
+		flex: 1 1 auto ;
+		overflow-x: auto ;
+		overflow-y: scroll ;
+	}
+
+	&__tree-inner {
+		padding: 22px 40px 30px 40px ;
+	}
+
+	&__detail {
+		background-color: #ffffff ;
+		border-left: 2px solid #e2e2e2 ;
+		flex: 0 0 auto ;
+		position: relative ;
+		width: 550px ;
+	}
+} // END: Screen Explorer Subview.
 
 .drag-shield {
 	bottom: 0px ;

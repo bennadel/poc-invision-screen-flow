@@ -19,6 +19,7 @@
 
 		<nav class="app-header__nav">
 			<a
+				#flowLink="routerLinkActive"
 				routerLink="/app/flow"
 				title="Connected Screens in Prototype"
 				class="app-header__nav-item app-header__nav-item--flow"
@@ -34,7 +35,7 @@
 			</a>
 		</nav>
 
-		<div *ngIf="true" class="app-header__zoom">
+		<div *ngIf="flowLink.isActive" class="app-header__zoom">
 			<a
 				(click)="zoomIn()"
 				title="Zoom In"
@@ -52,9 +53,7 @@
 	</div>
 
 	<div class="body">
-
 		<router-outlet></router-outlet>
-
 	</div>
 
 </ng-template>

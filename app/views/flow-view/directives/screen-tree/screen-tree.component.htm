@@ -1,0 +1,11 @@
+
+<inv-screen-tree-node
+	[treeNode]="rootTreeNode"
+	[selectedTreeNode]="selectedTreeNode"
+	[hintedTreeNodeIds]="hintedTreeNodeIds"
+	[screenOrientation]="screenOrientation"
+	[screenSize]="screenSize"
+	(select)="handleSelect( $event )"
+	(showHints)="handleShowHints( $event )"
+	(hideHints)="handleHideHints( $event )">
+</inv-screen-tree-node>
