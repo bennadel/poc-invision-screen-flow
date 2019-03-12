@@ -23,6 +23,7 @@ import { ScreenFlowRuntime } from "~/app/shared/services/screen-flow.runtime";
 })
 export class AppViewComponent {
 
+	public isLoaded: boolean;
 	public isShowingRouteLoadIndicator: boolean;
 
 	private screenFlowRuntime: ScreenFlowRuntime;
@@ -35,6 +36,7 @@ export class AppViewComponent {
 
 		this.screenFlowRuntime = screenFlowRuntime;
 
+		this.isLoaded = false;
 		this.isShowingRouteLoadIndicator = false;
 
 		// *************************************************************************** //
@@ -117,6 +119,7 @@ export class AppViewComponent {
 			.then(
 				() => {
 
+					this.isLoaded = true;
 					window.postMessage( "appready", "*" );
 
 				},

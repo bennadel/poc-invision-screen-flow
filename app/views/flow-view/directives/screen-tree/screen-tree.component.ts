@@ -57,7 +57,7 @@ export class ScreenTreeComponent {
 
 
 	public handleSelect( treeNode: FlowTreeNode ) : void {
-console.log( "select at root", treeNode );
+
 		this.selectEvents.emit( treeNode );
 
 	}

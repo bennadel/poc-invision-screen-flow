@@ -1,12 +1,15 @@
 
 // Import the core angular services.
+import { ActivatedRoute } from "@angular/router";
 import { combineLatest } from "rxjs/operators";
 import { Component } from "@angular/core";
 import { Observable } from "rxjs";
+import { Router } from "@angular/router";
 import { Subscription } from "rxjs";
 
 // Import the application components and services.
 import { FlowTree } from "~/app/shared/services/screen-flow.runtime";
+import { FlowTreeHotspot } from "~/app/shared/services/screen-flow.runtime";
 import { FlowTreeNode } from "~/app/shared/services/screen-flow.runtime";
 import { Project } from "~/app/shared/services/screen-flow.runtime";
 import { ProjectOrientation } from "~/app/shared/services/screen-flow.runtime";
@@ -30,16 +33,22 @@ export class FlowViewComponent {
 	public selectedTreeNode: FlowTreeNode | null;
 	public tree: FlowTree | null;
 
+	private activatedRoute: ActivatedRoute;
+	private router: Router;
 	private screenFlowRuntime: ScreenFlowRuntime;
 	private screenPreloaderService: ScreenPreloaderService;
 	private subscriptions: Subscription[];
 
 	// I initialize the flow-view component.
 	constructor(
+		activeatedRoute: ActivatedRoute,
+		router: Router,
 		screenFlowRuntime: ScreenFlowRuntime,
 		screenPreloaderService: ScreenPreloaderService
 		) {
 
+		this.activatedRoute = activeatedRoute;
+		this.router = router;
 		this.screenFlowRuntime = screenFlowRuntime;
 		this.screenPreloaderService = screenPreloaderService;
 
@@ -61,13 +70,30 @@ export class FlowViewComponent {
 
 		if ( treeNode === this.selectedTreeNode ) {
 
-			this.screenFlowRuntime.unselectTreeNode( treeNode );
+			this.router.navigate([ "/app/flow" ]);
 
 		} else {
 
-			this.screenFlowRuntime.selectTreeNode( treeNode );
-			
+			this.router.navigate([
+				"/app/flow",
+				{
+					screenID: treeNode.id
+				}
+			]);
+
 		}
+
+	}
+
+
+	public handleSelectHotspot( hotspot: FlowTreeHotspot ) : void {
+
+		this.router.navigate([
+			"/app/flow",
+			{
+				screenID: hotspot.targetScreenID 
+			}
+		]);
 
 	}
 
@@ -86,6 +112,16 @@ export class FlowViewComponent {
 	public ngOnInit() : void {
 
 		this.subscriptions.push(
+			this.activatedRoute.params.subscribe(
+				( params ) => {
+
+					params.screenID
+						? this.screenFlowRuntime.selectScreenID( +params.screenID )
+						: this.screenFlowRuntime.unselectTreeNode()
+					;
+
+				}
+			),
 			this.screenFlowRuntime.getProject().subscribe(
 				( project ) => {
 
@@ -133,25 +169,27 @@ export class FlowViewComponent {
 
 	}
 
+
+	public startFlowFromScreen( treeNode: FlowTreeNode ) : void {
+
+		alert( "Re-rendering is not supported in Proof-of-Concept." );
+
+	}
+
+
+	public viewScreenInPreview( treeNode: FlowTreeNode ) : void {
+
+		alert( "Preview is not supported in Proof-of-Concept." );
+
+	}
+
 	// ---
 	// PRIVATE METHODS.
 	// ---
 
 	private preloadRelatedScreenImages() : void {
 
-		if ( this.selectedTreeNode ) {
-
-			var imageUrls = this.selectedTreeNode.hotspots.map(
-				function( hotspot ) {
-
-					return( treeIndex[ hotspot.targetScreenID ].screen.imageUrl );
-
-				}
-			);
-
-			screenPreloader.preloadImages( imageUrls );
-
-		}
+		this.screenPreloaderService.preloadImages( this.screenFlowRuntime.getRelatedScreenImages() );
 
 	}
 

@@ -25,6 +25,10 @@ export interface FlowTreeHotspot {
 	y: number;
 }
 
+export interface FlowTreeIndex {
+	[ id: string ]: FlowTreeNode;
+}
+
 export interface FlowTreeNode {
 	hardLinkIDs: number[];
 	hotspots?: FlowTreeHotspot[];
@@ -58,6 +62,7 @@ export interface ScreenFlowState {
 	screenSize: number;
 	selectedTreeNode: FlowTreeNode | null;
 	tree: FlowTree | null;
+	treeIndex: FlowTreeIndex | null;
 }
 
 // ----------------------------------------------------------------------------------- //
@@ -95,7 +100,8 @@ export class ScreenFlowRuntime {
 			project: null,
 			projectOrientation: null,
 			selectedTreeNode: null,
-			tree: null
+			tree: null,
+			treeIndex: null
 		});
 
 		// NOTE: Since this is just a proof-of-concept, having the HTTP call right here
@@ -111,7 +117,8 @@ export class ScreenFlowRuntime {
 						isLoading: false,
 						project: response.project,
 						projectOrientation: response.projectOrientation,
-						tree: response.tree
+						tree: response.tree,
+						treeIndex: this.buildTreeIndex( response.tree )
 					});
 
 				}
@@ -119,6 +126,53 @@ export class ScreenFlowRuntime {
 		;
 
 		return( promise );
+
+	}
+
+
+	public selectHotspot( hotspot: FlowTreeHotspot ) : void {
+
+		var treeIndex = this.store.getSnapshot().treeIndex;
+
+		if ( ! treeIndex ) {
+
+			return;
+
+		}
+
+		var treeNode = treeIndex[ hotspot.targetScreenID ];
+
+		if ( ! treeNode ) {
+
+			return;
+
+		}
+
+		this.selectTreeNode( treeNode );
+
+	}
+
+
+	public selectScreenID( screenID: number ) : boolean {
+
+		var treeIndex = this.store.getSnapshot().treeIndex;
+
+		if ( ! treeIndex ) {
+
+			return( false );
+
+		}
+
+		var treeNode = treeIndex[ screenID ];
+
+		if ( ! treeNode ) {
+
+			return( false );
+
+		}
+
+		this.selectTreeNode( treeNode );
+		return( true );
 
 	}
 
@@ -132,7 +186,7 @@ export class ScreenFlowRuntime {
 	}
 
 
-	public unselectTreeNode( treeNode: FlowTreeNode ) : void {
+	public unselectTreeNode() : void {
 
 		this.store.setState({
 			selectedTreeNode: null
@@ -197,6 +251,36 @@ export class ScreenFlowRuntime {
 	}
 
 
+	public getRelatedScreenImages() : string[] {
+
+		var snapshot = this.store.getSnapshot();
+		var imageUrls: string[] = [];
+
+		if ( snapshot.selectedTreeNode && snapshot.selectedTreeNode.hotspots && snapshot.treeIndex ) {
+
+			var index = snapshot.treeIndex;
+
+			snapshot.selectedTreeNode.hotspots.forEach(
+				( hotspot ) => {
+
+					var targetNode = index[ hotspot.targetScreenID ];
+
+					if ( targetNode ) {
+
+						imageUrls.push( targetNode.screen.imageUrl );
+
+					}
+
+				}
+			);
+
+		}
+
+		return( imageUrls );
+
+	}
+
+
 	public getScreenSize() : Observable<number> {
 
 		return( this.store.select( "screenSize" ) );
@@ -214,6 +298,13 @@ export class ScreenFlowRuntime {
 	public getTree() : Observable<FlowTree | null> {
 
 		return( this.store.select( "tree" ) );
+
+	}
+
+
+	public getTreeIndex() : Observable<FlowTreeIndex | null> {
+
+		return( this.store.select( "treeIndex" ) );
 
 	}
 
@@ -248,6 +339,26 @@ export class ScreenFlowRuntime {
 	// PRIVATE METHODS.
 	// ---
 
+	private buildTreeIndex( tree: FlowTree ) : FlowTreeIndex {
+
+		var index: FlowTreeIndex = Object.create( null );
+		var nodesToVisit = [ tree.root ];
+
+		while ( nodesToVisit.length ) {
+
+			var node = ( nodesToVisit.shift() as FlowTreeNode );
+
+			index[ node.id ] = node;
+
+			nodesToVisit.push( ...node.links );
+
+		}
+
+		return( index );
+
+	}
+
+
 	// I return the initial state for the underlying store.
 	private getInitialState() : ScreenFlowState {
 
@@ -260,7 +371,8 @@ export class ScreenFlowRuntime {
 			projectOrientation: null,
 			screenSize: 1,
 			selectedTreeNode: null,
-			tree: null
+			tree: null,
+			treeIndex: null
 		};
 
 		return( initialState );

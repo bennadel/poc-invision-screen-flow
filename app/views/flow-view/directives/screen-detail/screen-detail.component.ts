@@ -1,6 +1,7 @@
 
 // Import the core angular services.
 import { Component } from "@angular/core";
+import { ElementRef } from "@angular/core";
 import { EventEmitter } from "@angular/core";
 
 // Import the application components and services.
@@ -30,11 +31,17 @@ export class ScreenDetailComponent {
 	public startFromScreenEvents: EventEmitter<FlowTreeNode>;
 	public treeNode!: FlowTreeNode;
 
-	// I initialize the screen-detail component.
-	constructor() {
+	private elementRef: ElementRef;
+	private renderWidth: number;
 
-		this.displayScale = 0.25;
+	// I initialize the screen-detail component.
+	constructor( elementRef: ElementRef ) {
+
+		this.elementRef = elementRef;
+
+		this.displayScale = 1;
 		this.previewScreenEvents = new EventEmitter();
+		this.renderWidth = 0;
 		this.selectHotspotEvents = new EventEmitter();
 		this.startFromScreenEvents = new EventEmitter();
 
@@ -43,6 +50,25 @@ export class ScreenDetailComponent {
 	// ---
 	// PUBLIC METHODS.
 	// ---
+
+	public ngOnChanges() : void {
+
+		this.elementRef.nativeElement.scrollTo( 0, 0 );
+
+		var thumbnail = this.elementRef.nativeElement.querySelector( ".thumbnail" );
+
+		if ( thumbnail ) {
+
+			this.displayScale = ( thumbnail.clientWidth / this.treeNode.screen.width );
+
+		} else {
+
+			this.displayScale = 0;
+
+		}
+
+	}
+
 
 	public selectHotspot( hotspot: FlowTreeHotspot ) : void {
 
