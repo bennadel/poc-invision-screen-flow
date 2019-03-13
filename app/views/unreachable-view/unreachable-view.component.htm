@@ -1,3 +1,50 @@
 
-Unreachable View
+<header class="header">
 
+	<h2 class="header__title">
+		Unreachable Screen
+	</h2>
+
+	<div class="header__description">
+		The following screens are unreachable from the current starting screen.
+	</div>
+
+</header>
+
+<ul *ngIf="( tree && tree.unreachable.length )" class="items">
+	<li *ngFor="let treeNode of tree.unreachable" class="items__item">
+
+		<div class="items__thumbnail">
+			<img [src]="treeNode.screen.thumbnailUrl" class="items__image" />
+		</div>
+
+		<div class="items__details">
+
+			<div class="items__name">
+				{{ treeNode.screen.name }}
+			</div>
+
+			<div class="items__filename">
+				{{ treeNode.screen.clientFilename }}
+			</div>
+
+			<div class="items__actions">
+				<a (click)="startFlowFromScreen( treeNode )" class="items__action">
+					Start Here
+				</a>
+				<span class="items__action-separator">
+					<br />
+				</span>
+				<a (click)="viewScreenInPreview( treeNode )" class="items__action">
+					Preview Screen
+				</a>
+			</div>
+
+		</div>
+
+	</li>
+</ul>
+
+<div *ngIf="( tree && ! tree.unreachable.length )">
+	<em>There are no unreachable screens in this prototype ( when starting from the selected screen ).</em>
+</div>

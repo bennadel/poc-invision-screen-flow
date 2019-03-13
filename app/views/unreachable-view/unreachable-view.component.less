@@ -1,4 +1,102 @@
 
 :host {
 	display: block ;
+	padding: 22px 40px 30px 40px ;
+}
+
+.header {
+	margin-bottom: 35px ;
+
+	&__title {
+		font-size: 35px ;
+		font-smoothing: antialiased ;
+			-webkit-font-smoothing: antialiased ;
+		font-weight: 300 ;
+		line-height: 40px ;
+		margin: 0px 0px 12px 0px ;
+	}
+
+	&__description {
+		color: #7e8890 ;
+		font-size: 16px ;
+		font-weight: 400 ;
+		line-height: 21px ;
+	}
+}
+
+.items {
+	list-style-type: none ;
+	margin: 16px 0px 16px 0px ;
+	padding: 0px 0px 0px 0px ;
+
+	&__item {
+		display: flex ;
+		margin: 16px 0px 30px 0px ;
+	}
+
+	&__thumbnail {
+		border: 2px solid #e0e0e0 ;
+		border-radius: 3px 3px 3px 3px ;
+		flex: 0 0 auto ;
+		height: 120px ;
+		margin-right: 20px ;
+		overflow: hidden ;
+		width: 150px ;
+	}
+
+	&__details {
+		flex: 1 1 auto ;
+		padding-top: 7px ;
+	}
+
+	&__image {
+		display: block ;
+		width: 100% ;
+	}
+
+	&__name {
+		color: #1f2532 ;
+		font-size: 16px ;
+		font-weight: 400 ;
+		line-height: 21px ;
+		margin-bottom: 4px ;
+	}
+
+	&__filename {
+		color: #7e8890 ;
+		font-size: 14px ;
+		font-weight: 400 ;
+		line-height: 20px ;
+	}
+
+	&__actions {
+		align-items: center ;
+		color: #464d5d ;
+		display: flex ;
+		font-size: 13px ;
+		font-weight: 600 ;
+		line-height: 18px ;
+		margin-top: 20px ;
+	}
+
+	&__action {
+		color: #424956 ;
+		flex: 0 0 auto ;
+		cursor: pointer ;
+		font-weight: 400 ;
+		text-decoration: underline ;
+	}
+
+	&__action:hover {
+		color: #000000 ;
+	}
+
+	&__action-separator {
+		background-color: #cccccc ;
+		border-radius: 4px 4px 4px 4px ;
+		flex: 0 0 auto ;
+		height: 4px ;
+		margin: 0px 10px 0px 10px ;
+		width: 4px ;
+	}
 }

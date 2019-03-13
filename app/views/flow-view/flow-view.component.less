@@ -1,37 +1,51 @@
 
 :host {
-	display: block ;
-}
-
-.explorer-subview {}
-
-.explorer {
 	bottom: 0px ;
 	display: flex ;
 	left: 0px ;
 	position: absolute ;
 	right: 0px ;
 	top: 0px ;
+}
 
-	&__tree {
-		cursor: grab ;
-		flex: 1 1 auto ;
-		overflow-x: auto ;
-		overflow-y: scroll ;
-	}
+.tree-panel {
+	cursor: grab ;
+	flex: 1 1 auto ;
+	overflow-x: auto ;
+	overflow-y: scroll ;
 
-	&__tree-inner {
+	&__inner {
 		padding: 22px 40px 30px 40px ;
 	}
+}
 
-	&__detail {
-		background-color: #ffffff ;
-		border-left: 2px solid #e2e2e2 ;
-		flex: 0 0 auto ;
-		position: relative ;
-		width: 550px ;
+.detail-panel {
+	background-color: #ffffff ;
+	border-left: 2px solid #e2e2e2 ;
+	flex: 0 0 auto ;
+	position: relative ;
+	width: 550px ;
+}
+
+.header {
+	margin-bottom: 35px ;
+
+	&__title {
+		font-size: 35px ;
+		font-smoothing: antialiased ;
+			-webkit-font-smoothing: antialiased ;
+		font-weight: 300 ;
+		line-height: 40px ;
+		margin: 0px 0px 12px 0px ;
 	}
-} // END: Screen Explorer Subview.
+
+	&__description {
+		color: #7e8890 ;
+		font-size: 16px ;
+		font-weight: 400 ;
+		line-height: 21px ;
+	}
+}
 
 .drag-shield {
 	bottom: 0px ;

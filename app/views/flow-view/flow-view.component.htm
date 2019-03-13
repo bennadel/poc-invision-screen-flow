@@ -1,52 +1,48 @@
 
-<!-- BEGIN: Screen Explorer Subview. -->
-<div class="explorer-subview explorer">
+<div
+	*ngIf="project"
+	invTreeDragger
+	(draggerStart)="setDragProtection( true )"
+	(draggerStop)="setDragProtection( false )"
+	[invTreeScroller]="selectedTreeNode"
+	class="tree-panel">
+	<!-- We need the INNER wrapper for proper padding. -->
+	<div class="tree-panel__inner">
 
-	<div
-		*ngIf="project"
-		inv-tree-dragger
-		(draggerStart)="setDragProtection( true )"
-		(draggerStop)="setDragProtection( false )"
-		inv-tree-scroller
-		class="explorer__tree">
-		<!-- We need the INNER wrapper for proper padding. -->
-		<div class="explorer__tree-inner">
+		<header class="header">
 
-			<header class="subview-header">
+			<h2 class="header__title">
+				{{ project.name }}
+			</h2>
 
-				<h2 class="subview-header__title">
-					{{ project.name }}
-				</h2>
+			<div class="header__description">
+				Your screen flow includes --- reachableScreenCount ---- linked screen(s) from your prototype.
+			</div>
 
-				<div class="subview-header__description">
-					Your screen flow includes --- reachableScreenCount ---- linked screen(s) from your prototype.
-				</div>
+		</header>
 
-			</header>
-
-			<inv-screen-tree
-				[rootTreeNode]="tree.root"
-				[selectedTreeNode]="selectedTreeNode"
-				[screenOrientation]="projectOrientation"
-				[screenSize]="screenSize"
-				(select)="handleSelect( $event )">
-			</inv-screen-tree>
-
-		</div>
-	</div>
-	<div *ngIf="selectedTreeNode" class="explorer__detail">
-
-		<inv-screen-detail
-			[treeNode]="selectedTreeNode"
-			(selectHotspot)="handleSelectHotspot( $event )"
-			(previewScreen)="viewScreenInPreview( $event )"
-			(startFromScreen)="startFlowFromScreen( $event )">
-		</inv-screen-detail>
+		<inv-screen-tree
+			[rootTreeNode]="tree.root"
+			[selectedTreeNode]="selectedTreeNode"
+			[screenOrientation]="projectOrientation"
+			[screenSize]="screenSize"
+			(select)="handleSelect( $event )"
+			class="tree">
+		</inv-screen-tree>
 
 	</div>
+</div>
+<div *ngIf="selectedTreeNode" class="detail-panel">
+
+	<inv-screen-detail
+		[treeNode]="selectedTreeNode"
+		(selectHotspot)="handleSelectHotspot( $event )"
+		(previewScreen)="viewScreenInPreview( $event )"
+		(startFromScreen)="startFlowFromScreen( $event )"
+		class="detail">
+	</inv-screen-detail>
 
 </div>
-<!-- END: Screen Explorer Subview. -->
 
 <!--
 	This will be shown when the app is dragging so as to prevent mouse events from

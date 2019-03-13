@@ -11,6 +11,8 @@ import { RoutableView } from "~/app/app.module";
 import { ScreenDetailComponent } from "./directives/screen-detail/screen-detail.component";
 import { ScreenTreeComponent } from "./directives/screen-tree/screen-tree.component";
 import { ScreenTreeNodeComponent } from "./directives/screen-tree/screen-tree-node.component";
+import { TreeDraggerDirective } from "./directives/tree-dragger.directive";
+import { TreeScrollerDirective } from "./directives/tree-scroller.directive";
 
 // ----------------------------------------------------------------------------------- //
 // ----------------------------------------------------------------------------------- //
@@ -28,7 +30,9 @@ import { ScreenTreeNodeComponent } from "./directives/screen-tree/screen-tree-no
 		FlowViewComponent,
 		ScreenDetailComponent,
 		ScreenTreeComponent,
-		ScreenTreeNodeComponent
+		ScreenTreeNodeComponent,
+		TreeDraggerDirective,
+		TreeScrollerDirective
 	]
 })
 export class FlowViewModule {

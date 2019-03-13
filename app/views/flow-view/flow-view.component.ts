@@ -1,7 +1,6 @@
 
 // Import the core angular services.
 import { ActivatedRoute } from "@angular/router";
-import { combineLatest } from "rxjs/operators";
 import { Component } from "@angular/core";
 import { Observable } from "rxjs";
 import { Router } from "@angular/router";
