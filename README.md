@@ -3,8 +3,8 @@
 
 by [Ben Nadel][bennadel]
 
-**[Run the Proof-of-Concept Angular App -- NOW News][poc-v1]** &raquo;
-**[Run the Proof-of-Concept Angular App -- NOW News for Watch][poc-v2]** &raquo;
+* **[Run the Proof-of-Concept Angular App -- NOW News][poc-v1]** &raquo;
+* **[Run the Proof-of-Concept Angular App -- NOW News for Watch][poc-v2]** &raquo;
 
 This is a WIP (Work in Progress) of a POC (Proof of Concept) for an InVision
 App feature that I would like to pitch to the Product Team. However, I need to
