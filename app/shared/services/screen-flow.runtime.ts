@@ -56,7 +56,6 @@ export interface Project {
 export type ProjectOrientation = "portrait" | "landscape";
 
 export interface ScreenFlowState {
-	isLoading: boolean;
 	project: Project | null;
 	projectOrientation: ProjectOrientation | null;
 	screenSize: number;
@@ -93,10 +92,10 @@ export class ScreenFlowRuntime {
 	// COMMAND METHODS.
 	// ---
 
-	public async load( version: 1 ) : Promise<void> {
+	// I load the given demo-data into the runtime. Returns a promise of success.
+	public async load( version: number ) : Promise<void> {
 
 		this.store.setState({
-			isLoading: true,
 			project: null,
 			projectOrientation: null,
 			selectedTreeNode: null,
@@ -114,7 +113,6 @@ export class ScreenFlowRuntime {
 				( response: any ) => {
 
 					this.store.setState({
-						isLoading: false,
 						project: response.project,
 						projectOrientation: response.projectOrientation,
 						tree: response.tree,
@@ -130,6 +128,7 @@ export class ScreenFlowRuntime {
 	}
 
 
+	// I select the tree node that is targeted by the given hotspot.
 	public selectHotspot( hotspot: FlowTreeHotspot ) : void {
 
 		var treeIndex = this.store.getSnapshot().treeIndex;
@@ -153,13 +152,14 @@ export class ScreenFlowRuntime {
 	}
 
 
-	public selectScreenID( screenID: number ) : boolean {
+	// I select the tree node with the given ID.
+	public selectScreenID( screenID: number ) : void {
 
 		var treeIndex = this.store.getSnapshot().treeIndex;
 
 		if ( ! treeIndex ) {
 
-			return( false );
+			return;
 
 		}
 
@@ -167,16 +167,16 @@ export class ScreenFlowRuntime {
 
 		if ( ! treeNode ) {
 
-			return( false );
+			return;
 
 		}
 
 		this.selectTreeNode( treeNode );
-		return( true );
 
 	}
 
 
+	// I select the given tree node.
 	public selectTreeNode( treeNode: FlowTreeNode ) : void {
 
 		this.store.setState({
@@ -186,11 +186,18 @@ export class ScreenFlowRuntime {
 	}
 
 
+	// I unselect the currently-selected tree node.
 	public unselectTreeNode() : void {
 
-		this.store.setState({
-			selectedTreeNode: null
-		});
+		var selectedTreeNode = this.store.getSnapshot().selectedTreeNode;
+
+		if ( selectedTreeNode ) {
+
+			this.store.setState({
+				selectedTreeNode: null
+			});
+
+		}
 
 	}
 
@@ -230,13 +237,7 @@ export class ScreenFlowRuntime {
 	// QUERY METHODS.
 	// ---
 
-	public getIsLoading() : Observable<boolean> {
-
-		return( this.store.select( "isLoading" ) );
-
-	}
-
-
+	// I return a stream for the project. May emit NULL.
 	public getProject() : Observable<Project | null> {
 
 		return( this.store.select( "project" ) );
@@ -244,6 +245,7 @@ export class ScreenFlowRuntime {
 	}
 
 
+	// I return a stream for the project orientation. May emit null.
 	public getProjectOrientation() : Observable<ProjectOrientation | null> {
 
 		return( this.store.select( "projectOrientation" ) );
@@ -251,6 +253,52 @@ export class ScreenFlowRuntime {
 	}
 
 
+	// I return a stream for the number of reachable screens in the flow.
+	public getReachableScreenCount() : Observable<number> {
+
+		var stream = this.store.select( "tree" );
+
+		var reducedStream = stream.pipe(
+			map(
+				( tree ) => {
+
+					if ( ! tree ) {
+
+						return( 0 );
+
+					}
+
+					function walkTreeNodes( node: FlowTreeNode ) : number {
+
+						var count = 1;
+
+						for ( var i = 0, length = node.links.length ; i < length ; i++ ) {
+
+							count += walkTreeNodes( node.links[ i ] );
+
+						}
+
+						return( count );
+
+					}
+
+					return( walkTreeNodes( tree.root ) );
+
+				}
+			)
+		);
+
+		return( reducedStream );
+
+	}
+
+
+	// I return an array of image URLs that can be linked-to from the currently-selected
+	// screen in the flow.
+	// --
+	// ASIDE: Why not return this as a stream? It seemed more complicated to return this
+	// a stream, considering that it depends on several parts of the state. But, I don't
+	// feel strongly.
 	public getRelatedScreenImages() : string[] {
 
 		var snapshot = this.store.getSnapshot();
@@ -281,6 +329,7 @@ export class ScreenFlowRuntime {
 	}
 
 
+	// I return a stream for the screen size.
 	public getScreenSize() : Observable<number> {
 
 		return( this.store.select( "screenSize" ) );
@@ -288,6 +337,7 @@ export class ScreenFlowRuntime {
 	}
 
 
+	// I return a stream for the selected tree node. May emit null.
 	public getSelectedTreeNode(): Observable<FlowTreeNode | null> {
 
 		return( this.store.select( "selectedTreeNode" ) );
@@ -295,43 +345,10 @@ export class ScreenFlowRuntime {
 	}
 
 
+	// I return a stream for the tree. May emit null.
 	public getTree() : Observable<FlowTree | null> {
 
 		return( this.store.select( "tree" ) );
-
-	}
-
-
-	public getTreeIndex() : Observable<FlowTreeIndex | null> {
-
-		return( this.store.select( "treeIndex" ) );
-
-	}
-
-
-	// I return a stream that contains the number of unreachable screen in the screen
-	// flow.
-	public getUnreachableScreenCount() : Observable<number> {
-
-		var stream = this.store.select( "tree" );
-
-		var reducedStream = stream.pipe(
-			map(
-				( tree ) => {
-
-					if ( ! tree ) {
-
-						return( 0 );
-
-					}
-
-					return( tree.unreachable.length );
-
-				}
-			)
-		);
-
-		return( reducedStream );
 
 	}
 
@@ -339,6 +356,7 @@ export class ScreenFlowRuntime {
 	// PRIVATE METHODS.
 	// ---
 
+	// I build an index of the tree that maps IDs to tree nodes.
 	private buildTreeIndex( tree: FlowTree ) : FlowTreeIndex {
 
 		var index: FlowTreeIndex = Object.create( null );
@@ -346,7 +364,7 @@ export class ScreenFlowRuntime {
 
 		while ( nodesToVisit.length ) {
 
-			var node = ( nodesToVisit.shift() as FlowTreeNode );
+			var node = nodesToVisit.shift() !; // Asserting non-null.
 
 			index[ node.id ] = node;
 
@@ -366,7 +384,6 @@ export class ScreenFlowRuntime {
 		// TypeScript by using a type annotation on our initial state. Otherwise, it
 		// won't be able to infer that our string is compatible with the type.
 		var initialState: ScreenFlowState = {
-			isLoading: true,
 			project: null,
 			projectOrientation: null,
 			screenSize: 1,

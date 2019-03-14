@@ -6,7 +6,13 @@
 	</h2>
 
 	<div class="header__description">
-		The following screens are unreachable from the current starting screen.
+		<ng-template [ngIf]="( tree && tree.unreachable.length )">
+			The following screens are unreachable from the current starting screen.
+		</ng-template>
+		<ng-template [ngIf]="( tree && ! tree.unreachable.length )">
+			There are <strong>no unreachable screens</strong> in this prototype
+			( when starting from the selected screen ).
+		</ng-template>
 	</div>
 
 </header>
@@ -44,7 +50,3 @@
 
 	</li>
 </ul>
-
-<div *ngIf="( tree && ! tree.unreachable.length )">
-	<em>There are no unreachable screens in this prototype ( when starting from the selected screen ).</em>
-</div>

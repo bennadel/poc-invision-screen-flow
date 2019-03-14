@@ -28,6 +28,7 @@ export class FlowViewComponent {
 	public isProtectingDrag: boolean;
 	public project: Project | null;
 	public projectOrientation: ProjectOrientation | null;
+	public reachableScreenCount: number;
 	public screenSize: number;
 	public selectedTreeNode: FlowTreeNode | null;
 	public tree: FlowTree | null;
@@ -54,6 +55,7 @@ export class FlowViewComponent {
 		this.isProtectingDrag = false;
 		this.project = null;
 		this.projectOrientation = null;
+		this.reachableScreenCount = 0;
 		this.screenSize = 1;
 		this.selectedTreeNode = null;
 		this.subscriptions = [];
@@ -65,12 +67,18 @@ export class FlowViewComponent {
 	// PUBLIC METHODS.
 	// ---
 
+	// I handle the selection of the given tree node.
 	public handleSelect( treeNode: FlowTreeNode ) : void {
 
+		// The selection process is really more of a "toggle" process that drives URL
+		// changes. If the given tree node is the CURRENTLY SELECTED one, then we want to
+		// navigate away from any selection (implicitly turning off selection).
 		if ( treeNode === this.selectedTreeNode ) {
 
 			this.router.navigate([ "/app/flow" ]);
 
+		// If the given tree node is NOT the currently selected one, then we want to
+		// navigate to the given node (implicitly selecting it).
 		} else {
 
 			this.router.navigate([
@@ -85,6 +93,7 @@ export class FlowViewComponent {
 	}
 
 
+	// I handle the selection of the given hotspot.
 	public handleSelectHotspot( hotspot: FlowTreeHotspot ) : void {
 
 		this.router.navigate([
@@ -97,6 +106,7 @@ export class FlowViewComponent {
 	}
 
 
+	// I get called once when the component is being destroyed.
 	public ngOnDestroy() : void {
 
 		for ( var subscription of this.subscriptions ) {
@@ -108,6 +118,7 @@ export class FlowViewComponent {
 	}
 
 
+	// I get called once when the component is being created.
 	public ngOnInit() : void {
 
 		this.subscriptions.push(
@@ -118,6 +129,12 @@ export class FlowViewComponent {
 						? this.screenFlowRuntime.selectScreenID( +params.screenID )
 						: this.screenFlowRuntime.unselectTreeNode()
 					;
+
+					// NOTE: At this point, it's possible that the route param didn't
+					// actually lead to a tree node selection (if the ID is invalid). We
+					// could respond by navigating away from the param; however, that
+					// just adds complexity for this PoC and represents an edge-case that
+					// is very unlikely (and not harmful).
 
 				}
 			),
@@ -135,6 +152,13 @@ export class FlowViewComponent {
 
 				}
 			),
+			this.screenFlowRuntime.getReachableScreenCount().subscribe(
+				( reachableScreenCount ) => {
+
+					this.reachableScreenCount = reachableScreenCount;
+
+				}
+			),
 			this.screenFlowRuntime.getScreenSize().subscribe(
 				( screenSize ) => {
 
@@ -146,7 +170,7 @@ export class FlowViewComponent {
 				( selectedTreeNode ) => {
 
 					this.selectedTreeNode = selectedTreeNode;
-					this.preloadRelatedScreenImages();
+					this.screenPreloaderService.preloadImages( this.screenFlowRuntime.getRelatedScreenImages() );
 
 				}
 			),
@@ -162,6 +186,7 @@ export class FlowViewComponent {
 	}
 
 
+	// I toggle the drag protection layer. 
 	public setDragProtection( isProtectingDrag: boolean ) : void {
 
 		this.isProtectingDrag = isProtectingDrag;
@@ -169,6 +194,7 @@ export class FlowViewComponent {
 	}
 
 
+	// I handle requests to start the screen-flow from the given node.
 	public startFlowFromScreen( treeNode: FlowTreeNode ) : void {
 
 		alert( "Re-rendering is not supported in Proof-of-Concept." );
@@ -176,19 +202,10 @@ export class FlowViewComponent {
 	}
 
 
+	// I handle requests to preview the given node in the live-site.
 	public viewScreenInPreview( treeNode: FlowTreeNode ) : void {
 
 		alert( "Preview is not supported in Proof-of-Concept." );
-
-	}
-
-	// ---
-	// PRIVATE METHODS.
-	// ---
-
-	private preloadRelatedScreenImages() : void {
-
-		this.screenPreloaderService.preloadImages( this.screenFlowRuntime.getRelatedScreenImages() );
 
 	}
 

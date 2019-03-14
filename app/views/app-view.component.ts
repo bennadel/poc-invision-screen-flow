@@ -110,12 +110,11 @@ export class AppViewComponent {
 	// PUBLIC METHODS.
 	// ---
 
+	// I get called once when the component is being created.
 	public ngOnInit() : void {
 
 		this.screenFlowRuntime
-			// NOTE: This `1` can eventually be replaced with a dynamic number that
-			// represents the sample-data that we have available.
-			.load( 1 )
+			.load( this.getDemoDataVersion() )
 			.then(
 				() => {
 
@@ -134,6 +133,7 @@ export class AppViewComponent {
 	}
 
 
+	// I zoom into the screen flow view.
 	public zoomIn() : void {
 
 		this.screenFlowRuntime.zoomIn();
@@ -141,9 +141,27 @@ export class AppViewComponent {
 	}
 
 
+	// I zoom out of the screen flow view.
 	public zoomOut() : void {
 
 		this.screenFlowRuntime.zoomOut();
+
+	}
+
+	// ---
+	// PRIVATE METHODS.
+	// ---
+
+	// I return the version of the demo-data to load.
+	private getDemoDataVersion() : number {
+
+		var search = window.location.search.slice( 1 );
+		var value = parseInt( search, 10 );
+		var version = ( value || 1 );
+
+		console.warn( "Loading demo-data version:", version );
+
+		return( version );
 
 	}
 

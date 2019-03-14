@@ -62,6 +62,7 @@ export class ScreenTreeNodeComponent {
 	// PUBLIC METHODS.
 	// ---
 
+	// I emit a hide-hints event.
 	public handleHideHints( treeNode: FlowTreeNode ) : void {
 		
 		this.hideHintsEvents.emit( treeNode );
@@ -69,6 +70,7 @@ export class ScreenTreeNodeComponent {
 	}
 
 
+	// I emit a screen selection event.
 	public handleSelect( treeNode: FlowTreeNode ) : void {
 
 		this.selectEvents.emit( treeNode );
@@ -76,6 +78,7 @@ export class ScreenTreeNodeComponent {
 	}
 
 
+	// I emit a show-hints event.
 	public handleShowHints( treeNode: FlowTreeNode ) : void {
 
 		this.showHintsEvents.emit( treeNode );
@@ -83,43 +86,20 @@ export class ScreenTreeNodeComponent {
 	}
 
 
+	// I get called when the input bindings are updated.
 	public ngOnChanges( changes: SimpleChanges ) : void {
 
 		if ( changes.hintedTreeNodeIds ) {
 
-			this.applyHintedTreeNodeIds();
+			this.isScreenHinted = !! ( this.hintedTreeNodeIds && this.hintedTreeNodeIds[ this.treeNode.id ] );
 
 		}
 
 		if ( changes.selectedTreeNode ) {
 
-			this.applySelectedTreeNode();
+			this.isScreenSelected = ( this.treeNode === this.selectedTreeNode );
 
 		}
-
-	}
-
-	// ---
-	// PRIVATE METHODS.
-	// ---
-
-	private applyHintedTreeNodeIds() : void {
-
-		if ( ! this.hintedTreeNodeIds ) {
-
-			this.isScreenHinted = false;
-			return;
-
-		}
-
-		this.isScreenHinted = ( this.treeNode.id in this.hintedTreeNodeIds );
-
-	}
-
-
-	private applySelectedTreeNode() : void {
-
-		this.isScreenSelected = ( this.treeNode === this.selectedTreeNode );
 
 	}
 

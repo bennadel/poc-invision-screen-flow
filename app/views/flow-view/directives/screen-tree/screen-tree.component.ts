@@ -10,7 +10,7 @@ import { ProjectOrientation } from "~/app/shared/services/screen-flow.runtime";
 // ----------------------------------------------------------------------------------- //
 // ----------------------------------------------------------------------------------- //
 
-interface IDMap {
+interface HintedIDMap {
 	[ id: number ]: "hard" | "soft";
 }
 
@@ -30,7 +30,7 @@ interface IDMap {
 })
 export class ScreenTreeComponent {
 
-	public hintedTreeNodeIds: IDMap | null;
+	public hintedTreeNodeIds: HintedIDMap | null;
 	public rootTreeNode!: FlowTreeNode;
 	public screenOrientation!: ProjectOrientation;
 	public screenSize!: number;
@@ -49,6 +49,7 @@ export class ScreenTreeComponent {
 	// PUBLIC METHODS.
 	// ---
 
+	// I clear the link hinting.
 	public handleHideHints( treeNode: FlowTreeNode ) : void {
 		
 		this.hintedTreeNodeIds = null;
@@ -56,6 +57,7 @@ export class ScreenTreeComponent {
 	}
 
 
+	// I emit a screen selection event.
 	public handleSelect( treeNode: FlowTreeNode ) : void {
 
 		this.selectEvents.emit( treeNode );
@@ -63,9 +65,11 @@ export class ScreenTreeComponent {
 	}
 
 
+	// I configure the link hinting for the given tree node.
 	public handleShowHints( treeNode: FlowTreeNode ) : void {
 
-		this.hintedTreeNodeIds = {};
+		// NOTE: Casting the value to help TypeScript figure out that this is NOT NULL.
+		this.hintedTreeNodeIds = ( Object.create( null ) as HintedIDMap );
 
 		for ( var id of treeNode.hardLinkIDs ) {
 

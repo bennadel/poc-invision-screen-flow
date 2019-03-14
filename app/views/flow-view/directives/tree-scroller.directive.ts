@@ -22,7 +22,7 @@ export class TreeScrollerDirective {
 
 	private elementRef: ElementRef;
 	private supportsSmoothScrolling: boolean;
-	private timer: any;
+	private timer: any; // NOTE: Using "any" helps TypeScript with the timer wonkiness.
 	private zone: NgZone;
 
 	// I initialize the tree-scroller directive.
@@ -46,11 +46,12 @@ export class TreeScrollerDirective {
 	// PUBLIC METHODS.
 	// ---
 
+	// I get called when the input bindings are updated.
 	public ngOnChanges() : void {
 
 		if ( this.supportsSmoothScrolling && this.selectedTreeNode ) {
 
-			window.clearTimeout( this.timer );
+			clearTimeout( this.timer );
 
 			// When the input bindings have updated, the View hasn't yet been updated. As
 			// such, we have to give the app a few ticks to update.
@@ -64,7 +65,7 @@ export class TreeScrollerDirective {
 			this.zone.runOutsideAngular(
 				() => {
 
-					this.timer = window.setTimeout( this.handleTick, 50 );
+					this.timer = setTimeout( this.handleTick, 50 );
 
 				}
 			);
@@ -74,9 +75,10 @@ export class TreeScrollerDirective {
 	}
 
 
+	// I get called once when the directive is being destroyed.
 	public ngOnDestroy() : void {
 
-		window.clearTimeout( this.timer );
+		clearTimeout( this.timer );
 
 	}
 
@@ -84,6 +86,8 @@ export class TreeScrollerDirective {
 	// PRIVATE METHODS.
 	// ---
 
+	// I determine if the current browser supports smooth scrolling in the 
+	// "scrollIntoView()" method.
 	private getBrowserSupportForSmoothScrolling() : boolean {
 
 		return( "scrollBehavior" in document.documentElement.style );
@@ -91,6 +95,7 @@ export class TreeScrollerDirective {
 	}
 
 
+	// I handle the scroll timer callback.
 	private handleTick = () : void => {
 
 		var selectedElement = this.elementRef.nativeElement.querySelector( ".tree-screen--selected" );

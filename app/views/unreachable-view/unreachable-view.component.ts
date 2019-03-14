@@ -28,8 +28,8 @@ export class UnreachableViewComponent {
 
 		this.screenFlowRuntime = screenFlowRuntime;
 
-		this.tree = null;
 		this.subscriptions = [];
+		this.tree = null;
 
 	}
 
@@ -37,6 +37,7 @@ export class UnreachableViewComponent {
 	// PUBLIC METHODS.
 	// ---
 
+	// I get called once when the component is being destroyed.
 	public ngOnDestroy() : void {
 
 		for ( var subscription of this.subscriptions ) {
@@ -48,6 +49,7 @@ export class UnreachableViewComponent {
 	}
 
 
+	// I get called once when the component is being created.
 	public ngOnInit() : void {
 
 		this.subscriptions.push(
@@ -63,6 +65,7 @@ export class UnreachableViewComponent {
 	}
 
 
+	// I handle requests to start the screen-flow from the given node.
 	public startFlowFromScreen( treeNode: FlowTreeNode ) : void {
 
 		alert( "Re-rendering is not supported in Proof-of-Concept." );
@@ -70,6 +73,7 @@ export class UnreachableViewComponent {
 	}
 
 
+	// I handle requests to preview the given node in the live-site.
 	public viewScreenInPreview( treeNode: FlowTreeNode ) : void {
 
 		alert( "Preview is not supported in Proof-of-Concept." );

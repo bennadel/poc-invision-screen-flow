@@ -50,6 +50,7 @@ export class TreeDraggerDirective {
 	// PUBLIC METHODS.
 	// ---
 
+	// I get called once when the directive is being destroyed.
 	public ngOnDestroy() : void {
 
 		this.elementRef.nativeElement.removeEventListener( "mousedown", this.handleMousedown, false );
@@ -71,6 +72,7 @@ export class TreeDraggerDirective {
 	}
 
 
+	// I get called once when the directive is being created.
 	public ngOnInit() : void {
 
 		// Since there's no need for the internal drag-interaction to trigger a change
@@ -91,6 +93,7 @@ export class TreeDraggerDirective {
 	// PRIVATE METHODS.
 	// ---
 
+	// I handle the mousedown event that may initiate the drag.
 	private handleMousedown = ( event: MouseEvent ) : void => {
 
 		// In order to prevent the drag interaction from selecting parts of the DOM, we
@@ -117,6 +120,7 @@ export class TreeDraggerDirective {
 	}
 
 
+	// I handle the mousemove event during drag processing.
 	private handleMousemove = ( event: MouseEvent ) : void => {
 
 		var deltaX = ( this.mousePosition.x - event.clientX );
@@ -152,6 +156,7 @@ export class TreeDraggerDirective {
 	}
 
 
+	// I handle the mouseup event that stops the drag processing.
 	private handleMouseup = ( event: MouseEvent ) : void => {
 
 		window.removeEventListener( "mousemove", this.handleMousemove, false );

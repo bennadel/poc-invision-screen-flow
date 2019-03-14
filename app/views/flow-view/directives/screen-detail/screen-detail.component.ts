@@ -32,7 +32,6 @@ export class ScreenDetailComponent {
 	public treeNode!: FlowTreeNode;
 
 	private elementRef: ElementRef;
-	private renderWidth: number;
 
 	// I initialize the screen-detail component.
 	constructor( elementRef: ElementRef ) {
@@ -41,7 +40,6 @@ export class ScreenDetailComponent {
 
 		this.displayScale = 1;
 		this.previewScreenEvents = new EventEmitter();
-		this.renderWidth = 0;
 		this.selectHotspotEvents = new EventEmitter();
 		this.startFromScreenEvents = new EventEmitter();
 
@@ -51,25 +49,28 @@ export class ScreenDetailComponent {
 	// PUBLIC METHODS.
 	// ---
 
+	// I get called when the input bindings are updated.
 	public ngOnChanges() : void {
 
+		// Whenever the tree node changes, we want to make sure the current container is
+		// scrolled to the top.
 		this.elementRef.nativeElement.scrollTo( 0, 0 );
 
+		// Technically, we only need to calculate the display scale the first time this
+		// component renders. However, it's easier to just do it whenever the tree node
+		// is updated. This way, we don't have to worry about the timing of the DOM
+		// and the view-model change-detection.
 		var thumbnail = this.elementRef.nativeElement.querySelector( ".thumbnail" );
 
-		if ( thumbnail ) {
-
-			this.displayScale = ( thumbnail.clientWidth / this.treeNode.screen.width );
-
-		} else {
-
-			this.displayScale = 0;
-
-		}
+		this.displayScale = ( thumbnail )
+			? ( thumbnail.clientWidth / this.treeNode.screen.width )
+			: 0
+		;
 
 	}
 
 
+	// I emit a hotspot selection event.
 	public selectHotspot( hotspot: FlowTreeHotspot ) : void {
 
 		this.selectHotspotEvents.emit( hotspot );
@@ -77,6 +78,7 @@ export class ScreenDetailComponent {
 	}
 
 
+	// I emit a start event for the current screen.
 	public startFlowFromScreen() : void {
 
 		this.startFromScreenEvents.emit( this.treeNode );
@@ -84,6 +86,7 @@ export class ScreenDetailComponent {
 	}
 
 
+	// I emit a preview event for the current screen.
 	public viewScreenInPreview() : void {
 
 		this.previewScreenEvents.emit( this.treeNode );
