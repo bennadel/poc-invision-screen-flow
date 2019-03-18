@@ -75,18 +75,13 @@ export class FlowViewComponent {
 		// navigate away from any selection (implicitly turning off selection).
 		if ( treeNode === this.selectedTreeNode ) {
 
-			this.router.navigate([ "/app/flow" ]);
+			this.navigateAwayFromScreen();
 
 		// If the given tree node is NOT the currently selected one, then we want to
 		// navigate to the given node (implicitly selecting it).
 		} else {
 
-			this.router.navigate([
-				"/app/flow",
-				{
-					screenID: treeNode.id
-				}
-			]);
+			this.navigateToScreen( treeNode.id );
 
 		}
 
@@ -96,12 +91,7 @@ export class FlowViewComponent {
 	// I handle the selection of the given hotspot.
 	public handleSelectHotspot( hotspot: FlowTreeHotspot ) : void {
 
-		this.router.navigate([
-			"/app/flow",
-			{
-				screenID: hotspot.targetScreenID 
-			}
-		]);
+		this.navigateToScreen( hotspot.targetScreenID );
 
 	}
 
@@ -125,16 +115,25 @@ export class FlowViewComponent {
 			this.activatedRoute.params.subscribe(
 				( params ) => {
 
-					params.screenID
-						? this.screenFlowRuntime.selectScreenID( +params.screenID )
-						: this.screenFlowRuntime.unselectTreeNode()
-					;
+					// If there is no ID in the route, then unselect any currently-
+					// selected screen.
+					if ( ! params.screenID ) {
 
-					// NOTE: At this point, it's possible that the route param didn't
-					// actually lead to a tree node selection (if the ID is invalid). We
-					// could respond by navigating away from the param; however, that
-					// just adds complexity for this PoC and represents an edge-case that
-					// is very unlikely (and not harmful).
+						this.screenFlowRuntime.unselectTreeNode();
+						return;
+
+					}
+
+					var success = this.screenFlowRuntime.selectScreenID( +params.screenID );
+
+					// At this point, it's possible that the route param didn't actually
+					// lead to a tree node selection (if the ID is invalid). If so, let's
+					// navigate away from any selection.
+					if ( ! success ) {
+
+						this.navigateAwayFromScreen();
+
+					}
 
 				}
 			),
@@ -159,6 +158,24 @@ export class FlowViewComponent {
 
 				}
 			),
+			this.screenFlowRuntime.getRelatedScreenImages().subscribe(
+				( relatedScreenImages ) => {
+
+					if ( relatedScreenImages.length ) {
+
+						// WHY NOT IN THE RUNTIME? At first, it might be tempting to put
+						// the pre-loading of image binaries into the Runtime service.
+						// However, I don't really see this as a "runtime" concern - I
+						// see this a "User Interface" (UI) concern. If we have the
+						// Runtime getting involved with user experience issues, then the
+						// lines of responsibility become too blurred. I don't want the
+						// Runtime to think about the browser (as little as possible).
+						this.screenPreloaderService.preloadImages( relatedScreenImages );
+
+					}
+
+				}
+			),
 			this.screenFlowRuntime.getScreenSize().subscribe(
 				( screenSize ) => {
 
@@ -170,7 +187,6 @@ export class FlowViewComponent {
 				( selectedTreeNode ) => {
 
 					this.selectedTreeNode = selectedTreeNode;
-					this.screenPreloaderService.preloadImages( this.screenFlowRuntime.getRelatedScreenImages() );
 
 				}
 			),
@@ -206,6 +222,30 @@ export class FlowViewComponent {
 	public viewScreenInPreview( treeNode: FlowTreeNode ) : void {
 
 		alert( "Preview is not supported in Proof-of-Concept." );
+
+	}
+
+	// ---
+	// PRIVATE METHODS.
+	// ---
+
+	// I navigate the router away from the currently-routed screen.
+	private navigateAwayFromScreen() : void {
+
+		this.router.navigate([ "/app/flow" ]);
+
+	}
+
+
+	// I navigate the router to the given screen ID.
+	private navigateToScreen( screenID: number ) : void {
+
+		this.router.navigate([
+			"/app/flow",
+			{
+				screenID: screenID
+			}
+		]);
 
 	}
 

@@ -55,9 +55,12 @@ export interface Project {
 
 export type ProjectOrientation = "portrait" | "landscape";
 
-export interface ScreenFlowState {
+// NOTE: Internal state interface is never needed outside of runtime.
+interface ScreenFlowState {
 	project: Project | null;
 	projectOrientation: ProjectOrientation | null;
+	reachableScreenCount: number;
+	relatedScreenImages: string[];
 	screenSize: number;
 	selectedTreeNode: FlowTreeNode | null;
 	tree: FlowTree | null;
@@ -84,7 +87,16 @@ export class ScreenFlowRuntime {
 		// because the store isn't really a "behavior" that we would ever want to swap -
 		// it's just a slightly more complex data structure. In reality, it's just a
 		// fancy hash/object that can also emit values.
-		this.store = new SimpleStore( this.getInitialState() );
+		this.store = new SimpleStore({
+			project: null,
+			projectOrientation: null,
+			reachableScreenCount: this.deriveReachableScreenCount( null ),
+			relatedScreenImages: this.deriveRelatedScreenImages( null, null ),
+			screenSize: 1,
+			selectedTreeNode: null,
+			tree: null,
+			treeIndex: this.deriveTreeIndex( null )
+		});
 
 	}
 
@@ -98,68 +110,65 @@ export class ScreenFlowRuntime {
 		this.store.setState({
 			project: null,
 			projectOrientation: null,
+			reachableScreenCount: this.deriveReachableScreenCount( null ),
+			relatedScreenImages: this.deriveRelatedScreenImages( null, null ),
 			selectedTreeNode: null,
 			tree: null,
-			treeIndex: null
+			treeIndex: this.deriveTreeIndex( null )
 		});
 
 		// NOTE: Since this is just a proof-of-concept, having the HTTP call right here
 		// in the runtime is OK. However, in production, this logic should be moved into
-		// a more formal API Client.
-		var promise = this.httpClient
-			.get( `./static/${ version }/data.json` )
+		// a more formal API Client (that would be called from this point).
+		var response = await this.httpClient
+			.get<any>( `./static/${ version }/data.json` )
 			.toPromise()
-			.then(
-				( response: any ) => {
-
-					this.store.setState({
-						project: response.project,
-						projectOrientation: response.projectOrientation,
-						tree: response.tree,
-						treeIndex: this.buildTreeIndex( response.tree )
-					});
-
-				}
-			)
 		;
 
-		return( promise );
-
-	}
-
-
-	// I select the tree node that is targeted by the given hotspot.
-	public selectHotspot( hotspot: FlowTreeHotspot ) : void {
-
-		var treeIndex = this.store.getSnapshot().treeIndex;
-
-		if ( ! treeIndex ) {
+		// If the store has already been populated while we were executing the async
+		// fetch, let's just return-out - another request has already loaded data into
+		// the runtime and taken over.
+		if ( this.store.getSnapshot().project ) {
 
 			return;
 
 		}
 
-		var treeNode = treeIndex[ hotspot.targetScreenID ];
+		var treeIndex = this.deriveTreeIndex( response.tree );
+		var reachableScreenCount = this.deriveReachableScreenCount( response.tree );
+		var relatedScreenImages = this.deriveRelatedScreenImages( null, treeIndex );
 
-		if ( ! treeNode ) {
-
-			return;
-
-		}
-
-		this.selectTreeNode( treeNode );
+		this.store.setState({
+			project: response.project,
+			projectOrientation: response.projectOrientation,
+			reachableScreenCount: reachableScreenCount,
+			relatedScreenImages: relatedScreenImages,
+			selectedTreeNode: null,
+			tree: response.tree,
+			treeIndex: treeIndex
+		});
 
 	}
 
 
-	// I select the tree node with the given ID.
-	public selectScreenID( screenID: number ) : void {
+	// I select the tree node that is targeted by the given hotspot. Returns a boolean
+	// indicating whether or not the selection was successful.
+	public selectHotspot( hotspot: FlowTreeHotspot ) : boolean {
+
+		return( this.selectScreenID( hotspot.targetScreenID ) );
+
+	}
+
+
+	// I select the tree node with the given ID. Returns a boolean indicating whether or
+	// not the selection was successful.
+	public selectScreenID( screenID: number ) : boolean {
 
 		var treeIndex = this.store.getSnapshot().treeIndex;
 
 		if ( ! treeIndex ) {
 
-			return;
+			return( false );
 
 		}
 
@@ -167,21 +176,25 @@ export class ScreenFlowRuntime {
 
 		if ( ! treeNode ) {
 
-			return;
+			return( false );
 
 		}
 
-		this.selectTreeNode( treeNode );
+		this.store.setState({
+			relatedScreenImages: this.deriveRelatedScreenImages( treeNode, treeIndex ),
+			selectedTreeNode: treeNode
+		});
+
+		return( true );
 
 	}
 
 
-	// I select the given tree node.
-	public selectTreeNode( treeNode: FlowTreeNode ) : void {
+	// I select the given tree node. Returns a boolean indicating whether or not the
+	// selection was successful.
+	public selectTreeNode( treeNode: FlowTreeNode ) : boolean {
 
-		this.store.setState({
-			selectedTreeNode: treeNode
-		});
+		return( this.selectScreenID( treeNode.id ) );
 
 	}
 
@@ -191,13 +204,18 @@ export class ScreenFlowRuntime {
 
 		var selectedTreeNode = this.store.getSnapshot().selectedTreeNode;
 
-		if ( selectedTreeNode ) {
+		if ( ! selectedTreeNode ) {
 
-			this.store.setState({
-				selectedTreeNode: null
-			});
+			return;
 
 		}
+
+		var treeIndex = this.store.getSnapshot().treeIndex;
+
+		this.store.setState({
+			relatedScreenImages: this.deriveRelatedScreenImages( null, treeIndex ),
+			selectedTreeNode: null
+		});
 
 	}
 
@@ -256,75 +274,16 @@ export class ScreenFlowRuntime {
 	// I return a stream for the number of reachable screens in the flow.
 	public getReachableScreenCount() : Observable<number> {
 
-		var stream = this.store.select( "tree" );
-
-		var reducedStream = stream.pipe(
-			map(
-				( tree ) => {
-
-					if ( ! tree ) {
-
-						return( 0 );
-
-					}
-
-					function walkTreeNodes( node: FlowTreeNode ) : number {
-
-						var count = 1;
-
-						for ( var i = 0, length = node.links.length ; i < length ; i++ ) {
-
-							count += walkTreeNodes( node.links[ i ] );
-
-						}
-
-						return( count );
-
-					}
-
-					return( walkTreeNodes( tree.root ) );
-
-				}
-			)
-		);
-
-		return( reducedStream );
+		return( this.store.select( "reachableScreenCount" ) );
 
 	}
 
 
-	// I return an array of image URLs that can be linked-to from the currently-selected
-	// screen in the flow.
-	// --
-	// ASIDE: Why not return this as a stream? It seemed more complicated to return this
-	// a stream, considering that it depends on several parts of the state. But, I don't
-	// feel strongly.
-	public getRelatedScreenImages() : string[] {
+	// I return a stream for the array of image URLs that can be linked-to from the
+	// currently-selected screen in the flow.
+	public getRelatedScreenImages() : Observable<string[]> {
 
-		var snapshot = this.store.getSnapshot();
-		var imageUrls: string[] = [];
-
-		if ( snapshot.selectedTreeNode && snapshot.selectedTreeNode.hotspots && snapshot.treeIndex ) {
-
-			var index = snapshot.treeIndex;
-
-			snapshot.selectedTreeNode.hotspots.forEach(
-				( hotspot ) => {
-
-					var targetNode = index[ hotspot.targetScreenID ];
-
-					if ( targetNode ) {
-
-						imageUrls.push( targetNode.screen.imageUrl );
-
-					}
-
-				}
-			);
-
-		}
-
-		return( imageUrls );
+		return( this.store.select( "relatedScreenImages" ) );
 
 	}
 
@@ -356,8 +315,75 @@ export class ScreenFlowRuntime {
 	// PRIVATE METHODS.
 	// ---
 
-	// I build an index of the tree that maps IDs to tree nodes.
-	private buildTreeIndex( tree: FlowTree ) : FlowTreeIndex {
+	// I return the number of screens that are reachable in the given tree.
+	private deriveReachableScreenCount( tree: FlowTree | null ) : number {
+
+		// If we have no tree yet, no screens can be reached (obviously).
+		if ( ! tree ) {
+
+			return( 0 );
+
+		}
+
+		return( walkTreeNodes( tree.root ) );
+
+		// -- Hoisted functions.
+
+		function walkTreeNodes( node: FlowTreeNode ) : number {
+
+			var count = 1;
+
+			for ( var linkedNode of node.links ) {
+
+				count += walkTreeNodes( linkedNode );
+
+			}
+
+			return( count );
+
+		}
+
+	}
+
+
+	// I return an array of image URLs that can be linked-to from the currently-selected
+	// screen in the flow.
+	private deriveRelatedScreenImages(
+		selectedTreeNode: FlowTreeNode | null,
+		treeIndex: FlowTreeIndex | null
+		) : string[] {
+
+		var imageUrls: string[] = [];
+		var targetNode;
+
+		if ( selectedTreeNode && selectedTreeNode.hotspots && treeIndex ) {
+
+			for ( var hotspot of selectedTreeNode.hotspots ) {
+
+				if ( targetNode = treeIndex[ hotspot.targetScreenID ] ) {
+
+					imageUrls.push( targetNode.screen.imageUrl );
+
+				}
+
+			}
+
+		}
+
+		return( imageUrls );
+
+	}
+
+
+	// I return an index of the tree that maps IDs to tree nodes.
+	private deriveTreeIndex( tree: FlowTree | null ) : FlowTreeIndex | null {
+
+		// If we have no tree yet, we can't build an index.
+		if ( ! tree ) {
+
+			return( null );
+
+		}
 
 		var index: FlowTreeIndex = Object.create( null );
 		var nodesToVisit = [ tree.root ];
@@ -373,26 +399,6 @@ export class ScreenFlowRuntime {
 		}
 
 		return( index );
-
-	}
-
-
-	// I return the initial state for the underlying store.
-	private getInitialState() : ScreenFlowState {
-
-		// NOTE: Because we are using a string-literal as a "type", we have to help
-		// TypeScript by using a type annotation on our initial state. Otherwise, it
-		// won't be able to infer that our string is compatible with the type.
-		var initialState: ScreenFlowState = {
-			project: null,
-			projectOrientation: null,
-			screenSize: 1,
-			selectedTreeNode: null,
-			tree: null,
-			treeIndex: null
-		};
-
-		return( initialState );
 
 	}
 
